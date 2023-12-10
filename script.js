@@ -60,12 +60,37 @@ document.addEventListener("DOMContentLoaded", () => {
         
     }
 
+    function isGameOver() {
+        // check snake body hit
+        for(i = 1; i < snake.length; i++) {
+            if(snake[0].x === snake[i].x && snake[0].y === snake[i].y) return; // game over
+        }
+
+        // check wall collision
+
+        let isHittingLeftWall = snake[0].x < 0;
+        let isHittingTopWall = snake[0].y < 0;
+        let isHittingRightWall = snake[0].x >= arenaSize;
+        let isHittingDownWall = snake[0].y >= arenaSize;
+
+        return isHittingLeftWall || isHittingTopWall || isHittingRightWall || isHittingDownWall; // game over
+    }
+
     function gameLoop() {
         setInterval(() => {
+            if(!gameStart) return;
+            // check game over
+            if(isGameOver()) {
+                gameStart = false;
+                alert(`Game over, score: ${score}`);
+                window.location.reload();
+                return;
+            }
+
             updateGame();
             drawScoreBoard();
             drawFoodAndSnake();
-        },1000);
+        },500);
     }
 
     function runGame() {
