@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let snake = [{x: 160, y: 200}, {x: 140, y: 200}, {x: 120, y: 200}];
     let dx = cellSize; // desplacement in x-axis
     let dy = 0; // desplacemen in y-axis
+    let gameSpeed = 200;
+    let intervalId;
 
     function drawScoreBoard() {
         const scoreBoard = document.getElementById("score-board");
@@ -38,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function moveFood() {
         let newX, newY;
         do {
-            newX = Math.floor(Math.random() * ((arenaSize - cellSize)/cellSize) * cellSize);
-            newY = Math.floor(Math.random() * ((arenaSize - cellSize)/cellSize) * cellSize);
+            newX = Math.floor(Math.random() * ((arenaSize - cellSize)/cellSize))* cellSize;
+            newY = Math.floor(Math.random() * ((arenaSize - cellSize)/cellSize))* cellSize;
         } while(snake.some(snakeCell => snakeCell.x == snakeCell.newX && snake.y == snake.newY));
         food = {x: newX, y: newY};
     }
@@ -51,6 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if(newHead.x == food.x && newHead.y == food.y) {
             // collision
             score += 5;
+            if(gameSpeed > 30) {
+                clearInterval(intervalId);
+
+                gameSpeed -= 10;
+                
+                gameLoop();
+            }
             // don't pop the tail
             moveFood();
             // move the food
@@ -77,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function gameLoop() {
-        setInterval(() => {
+       intervalId = setInterval(() => {
             if(!gameStart) return;
             // check game over
             if(isGameOver()) {
@@ -90,12 +99,34 @@ document.addEventListener("DOMContentLoaded", () => {
             updateGame();
             drawScoreBoard();
             drawFoodAndSnake();
-        },500);
+        },gameSpeed);
     }
 
+    function changeDirection(e) {
+        const Left_Key = 37;
+        const Right_Key = 39;
+        const Up_Key = 38;
+        const Down_Key = 40;
+        const keyPressed = e.keyCode;
+
+        const isGoingUp = dy == -cellSize;
+        const isGoingDown = dy == cellSize;
+        const isGoingLeft = dx == -cellSize;
+        const isGoingRight = dx == cellSize;
+        
+        if(keyPressed == Left_Key && !isGoingRight) {dy = 0, dx = -cellSize};
+        if(keyPressed == Right_Key && !isGoingLeft) {dy = 0, dx = cellSize};
+        if(keyPressed == Up_Key && !isGoingDown) {dy = -cellSize, dx = 0};
+        if(keyPressed == Down_Key && !isGoingUp) {dy = cellSize, dx = 0};
+    }
     function runGame() {
-        gameStart = true;
-        gameLoop();
+        if(!gameStart) {
+            gameStart = true;
+            gameLoop();
+            document.addEventListener("keydown", changeDirection);
+        }
+        
+        
     }
 
     function initiateGame() {
